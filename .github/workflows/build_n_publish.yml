@@ -40,8 +40,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     environment:
-      name: release
-      url: https://pypi.org/p/wagtail-oidc-provider
+      name: pypi
     permissions:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
@@ -52,6 +51,3 @@ jobs:
           path: dist/
       - name: Publish package distributions to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
