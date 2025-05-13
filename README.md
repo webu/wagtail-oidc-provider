@@ -13,8 +13,10 @@ Add `wagtail_oidc_provider` to your `INSTALLED_APP`:
 ```py
 INSTALLED_APP = [
     ...
-    "oidc-provider",
-    "wagtail-oidc-provider",
+    "oidc_provider",
+    "wagtail_oidc_provider",
     ...
 ]
 ```
+
+and configuration snippet will popup in the admin navbar of wagtail!
