@@ -1,6 +1,10 @@
+from hashlib import sha224
+from random import randint
+from uuid import uuid4
+
+from django.forms import ModelForm
 from django.utils.translation import gettext_lazy as _
 
-from oidc_provider.admin import ClientForm
 from oidc_provider.models import Client
 from oidc_provider.models import Code
 from oidc_provider.models import RSAKey
@@ -10,6 +14,42 @@ from wagtail.admin.panels import MultiFieldPanel
 from wagtail.snippets.models import register_snippet
 from wagtail.snippets.views.snippets import SnippetViewSet
 from wagtail.snippets.views.snippets import SnippetViewSetGroup
+
+
+class ClientForm(ModelForm):
+    class Meta:
+        model = Client
+        exclude = []
+
+    def __init__(self, *args, **kwargs):
+        super(ClientForm, self).__init__(*args, **kwargs)
+        self.fields["client_id"].required = False
+        self.fields["client_id"].widget.attrs["disabled"] = "true"
+        self.fields["client_secret"].required = False
+        self.fields["client_secret"].widget.attrs["disabled"] = "true"
+
+    def clean_client_id(self):
+        instance = getattr(self, "instance", None)
+        if instance and instance.pk:
+            return instance.client_id
+        else:
+            return str(randint(1, 999999)).zfill(6)
+
+    def clean_client_secret(self):
+        instance = getattr(self, "instance", None)
+
+        secret = ""
+
+        if instance and instance.pk:
+            if (self.cleaned_data["client_type"] == "confidential") and not instance.client_secret:
+                secret = sha224(uuid4().hex.encode()).hexdigest()
+            elif (self.cleaned_data["client_type"] == "confidential") and instance.client_secret:
+                secret = instance.client_secret
+        else:
+            if self.cleaned_data["client_type"] == "confidential":
+                secret = sha224(uuid4().hex.encode()).hexdigest()
+
+        return secret
 
 
 class ClientViewSet(SnippetViewSet):
